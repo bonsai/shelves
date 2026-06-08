@@ -2,7 +2,7 @@
   "$schema": "https://opencode.ai/config.json",
   "agent": {
     "key-manager": {
-      "description": "Manages Firebase App Hosting secrets, Clerk env vars, .env.local, and deployment credentials for the jacket9 project.",
+      "description": "Manages Firebase App Hosting secrets, Clerk env vars, .env.local, and deployment credentials for the shelves project.",
       "mode": "subagent"
     }
   }

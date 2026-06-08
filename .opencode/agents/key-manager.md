@@ -16,7 +16,7 @@ You help manage environment variables, Firebase secrets, and Clerk configuration
 - **Firebase project**: `jacket9` (project ID)
 - **App Hosting backend**: `jacket9-backend` (us-central1)
 - **Clerk app**: `My Application` (app_3EqqEM0hloBNC7EgmLmXXcwhPFW)
-- **GitHub repo**: `bonsai/jacket9`
+- **GitHub repo**: `bonsai/shelves`
 - **App Hosting URL**: `https://jacket9-backend--jacket9.us-central1.hosted.app`
 
 ## Environment Variable Categories
