@@ -1,0 +1,48 @@
+name: Auto Issues
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # every Monday
+  workflow_dispatch:
+
+jobs:
+  create-weekly-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for missing secrets
+        id: check-secrets
+        run: |
+          MISSING=""
+          for secret in DATABASE_URL STRIPE_SECRET_KEY NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY STRIPE_PRO_PRICE_ID STRIPE_WEBHOOK_SECRET DISCOGS_TOKEN LASTFM_API_KEY GEMINI_API_KEY; do
+            if ! gh secret list --repo ${{ github.repository }} 2>/dev/null | grep -q "^$secret "; then
+              MISSING="$MISSING\n- $secret"
+            fi
+          done
+          echo "missing<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$MISSING" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create missing secrets issue
+        if: steps.check-secrets.outputs.missing != ''
+        run: |
+          gh issue create \
+            --title "Set missing Firebase secrets" \
+            --body "The following secrets are not yet set:\n${{ steps.check-secrets.outputs.missing }}\n\nUse: \`echo '<value>' | firebase apphosting:secrets:set <NAME>\`" \
+            --label "secrets,deployment" \
+            --project "jacket9"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create weekly maintenance issue
+        run: |
+          gh issue create \
+            --title "Weekly maintenance $(date +%Y-%m-%d)" \
+            --body "- [ ] Review and rotate API keys\n- [ ] Check Firebase App Hosting logs\n- [ ] Verify webhook endpoints\n- [ ] Check DB performance\n- [ ] Review open issues" \
+            --label "devops" \
+            --project "jacket9"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,16 @@
+name: Feature Request
+description: Suggest a new feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this feature do?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this needed?
