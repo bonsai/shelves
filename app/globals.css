@@ -1,6 +1,41 @@
 @import "tailwindcss";
 
-body {
-  background: #f8f7f4;
-  font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+:root {
+  --cream:   #faf8f4;
+  --ink:     #1c1917;
+  --muted:   #78716c;
+  --border:  #e7e5e0;
+  --amber:   #d97706;
+  --gold:    #fbbf24;
+  --done-bg: #fef3c7;
+  --done-fg: #92400e;
 }
+
+* { box-sizing: border-box; }
+
+html { background: var(--cream); }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'Yu Mincho', 'YuMincho', Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* sans for UI chrome */
+.ui {
+  font-family: 'Hiragino Sans', 'Meiryo', system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+/* slot grid animations */
+@keyframes pop {
+  0%   { transform: scale(0.85); opacity: 0; }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+.slot-pop { animation: pop 0.2s ease-out; }

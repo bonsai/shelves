@@ -1,3 +1,1 @@
-import { resetDB } from '@/lib/db'
-import { beforeEach } from 'vitest'
-beforeEach(() => resetDB())
+// Drizzle uses real DB; unit tests mock at the db module level

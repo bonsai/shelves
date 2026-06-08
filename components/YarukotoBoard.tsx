@@ -4,7 +4,7 @@ import type { Board, Item } from '@/lib/types'
 import ItemEditor from './ItemEditor'
 
 const NSLOTS = 100
-const COLS = 9
+const COLS   = 10
 
 interface Props {
   board: Board
@@ -23,7 +23,7 @@ export default function YarukotoBoard({ board, initialItems }: Props) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
   const bySlot = Object.fromEntries(items.map(m => [m.slot_idx, m]))
-  const done = items.filter(i => i.done).length
+  const done   = items.filter(i => i.done).length
 
   function handleSlotClick(slotIdx: number) {
     const existing = bySlot[slotIdx]
@@ -89,7 +89,6 @@ export default function YarukotoBoard({ board, initialItems }: Props) {
     setItems(prev => prev.filter(m => m.id !== itemId))
   }
 
-  // 5s polling
   useEffect(() => {
     const t = setInterval(async () => {
       const res = await fetch(`/api/boards/${board.slug}`)
@@ -105,60 +104,51 @@ export default function YarukotoBoard({ board, initialItems }: Props) {
 
   return (
     <div>
-      {/* progress bar (client-side live) */}
-      <div className="flex items-center gap-2 mb-3 text-xs text-stone-500">
-        <div className="flex-1 bg-stone-200 rounded-full h-1.5">
-          <div
-            className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-            style={{ width: `${done}%` }}
-          />
-        </div>
-        <span>{done}/100</span>
-      </div>
-
       {/* grid */}
       <div
-        className="grid gap-1"
+        className="grid gap-1.5"
         style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
       >
         {slots.map(i => {
-          const item = bySlot[i]
-          const isConfirming = item && deleteConfirm === item.id
+          const item        = bySlot[i]
+          const isConfirm   = item && deleteConfirm === item.id
 
           return (
             <div key={i} className="relative group">
               <button
                 onClick={() => handleSlotClick(i)}
-                className={`w-full aspect-square rounded-lg border text-xs flex flex-col items-center justify-center gap-0.5 transition-all
-                  ${item
+                className={[
+                  'w-full aspect-square rounded-lg border text-[9px] flex flex-col items-center justify-center gap-0.5 transition-all duration-150 leading-tight',
+                  item
                     ? item.done
-                      ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
-                      : 'bg-stone-700 border-stone-600 text-amber-50 hover:bg-stone-600'
-                    : 'bg-white border-stone-200 text-stone-300 hover:bg-stone-50 hover:border-stone-300'
-                  }`}
+                      ? 'bg-[var(--done-bg)] border-[var(--gold)] text-[var(--done-fg)]'
+                      : 'bg-[var(--ink)] border-[var(--ink)] text-[var(--cream)] hover:opacity-80'
+                    : 'bg-white border-[var(--border)] text-[var(--border)] hover:border-[var(--muted)] hover:text-[var(--muted)]',
+                ].join(' ')}
               >
-                <span className="text-[9px] opacity-50 leading-none">{i + 1}</span>
+                <span className="opacity-40 leading-none" style={{ fontSize: 7 }}>{i + 1}</span>
                 {item ? (
-                  <span
-                    className="leading-tight text-center px-0.5 break-all"
-                    style={{ fontSize: 9, lineHeight: 1.2 }}
-                  >
-                    {item.text.slice(0, 6)}{item.text.length > 6 ? '…' : ''}
+                  <span className="px-0.5 break-all text-center" style={{ fontSize: 8, lineHeight: 1.25 }}>
+                    {item.text.slice(0, 7)}{item.text.length > 7 ? '…' : ''}
                   </span>
                 ) : (
-                  <span style={{ fontSize: 10 }}>+</span>
+                  <span style={{ fontSize: 11 }}>+</span>
                 )}
               </button>
 
               {/* done toggle */}
-              {item && !isConfirming && (
+              {item && !isConfirm && (
                 <button
                   onClick={e => toggleDone(item, e)}
-                  className={`absolute -top-1 -left-1 w-4 h-4 rounded-full text-white text-xs
-                    flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100
-                    ${item.done ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-stone-400 hover:bg-emerald-500'}`}
-                  style={{ fontSize: 8 }}
                   title={item.done ? '未完了に戻す' : '達成！'}
+                  className={[
+                    'absolute -top-1 -left-1 w-4 h-4 rounded-full text-white flex items-center justify-center',
+                    'opacity-0 group-hover:opacity-100 transition-opacity',
+                    item.done
+                      ? 'bg-[var(--amber)] hover:opacity-80'
+                      : 'bg-[var(--muted)] hover:bg-[var(--amber)]',
+                  ].join(' ')}
+                  style={{ fontSize: 8 }}
                 >
                   ✓
                 </button>
@@ -168,18 +158,37 @@ export default function YarukotoBoard({ board, initialItems }: Props) {
               {item && (
                 <button
                   onClick={e => handleDelete(item.id, e)}
-                  className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-xs
-                    flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100
-                    ${isConfirming ? 'bg-red-600 opacity-100' : 'bg-red-400 hover:bg-red-500'}`}
+                  title={isConfirm ? '本当に削除？' : '削除'}
+                  className={[
+                    'absolute -top-1 -right-1 w-4 h-4 rounded-full text-white flex items-center justify-center transition-all',
+                    isConfirm
+                      ? 'bg-red-500 opacity-100'
+                      : 'bg-[var(--muted)] opacity-0 group-hover:opacity-100 hover:bg-red-400',
+                  ].join(' ')}
                   style={{ fontSize: 8 }}
-                  title={isConfirming ? '本当に削除？' : '削除'}
                 >
-                  {isConfirming ? '？' : '×'}
+                  {isConfirm ? '?' : '×'}
                 </button>
               )}
             </div>
           )
         })}
+      </div>
+
+      {/* legend */}
+      <div className="ui flex items-center gap-4 mt-4 text-xs text-[var(--muted)]">
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded bg-[var(--ink)] inline-block" />
+          やること
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded bg-[var(--done-bg)] border border-[var(--gold)] inline-block" />
+          達成済み {done > 0 && `(${done})`}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded bg-white border border-[var(--border)] inline-block" />
+          未入力
+        </span>
       </div>
 
       {/* editor */}

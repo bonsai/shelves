@@ -1,5 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+
+const EXAMPLES = [
+  '富士山に登る', '世界一周する', 'オーロラを見る', 'マラソンを完走する',
+  '本を出版する', '100カ国訪問', 'ダイビングの資格を取る', '星空の下で眠る',
+]
 
 interface Props {
   slotNumber: number
@@ -12,6 +17,10 @@ interface Props {
 export default function ItemEditor({ slotNumber, initialText, isEdit, onSave, onCancel }: Props) {
   const [text, setText] = useState(initialText)
   const [saving, setSaving] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const placeholder = EXAMPLES[(slotNumber - 1) % EXAMPLES.length]
+
+  useEffect(() => { inputRef.current?.focus() }, [])
 
   async function handleSave() {
     if (!text.trim()) return
@@ -21,37 +30,61 @@ export default function ItemEditor({ slotNumber, initialText, isEdit, onSave, on
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-xl p-4 z-50">
-      <div className="text-xs text-stone-400 mb-2">
-        {isEdit ? '✏️ 編集中' : `#${slotNumber} やることを書く`}
-      </div>
-
-      <input
-        type="text"
-        value={text}
-        onChange={e => setText(e.target.value)}
-        placeholder="例: 富士山に登る"
-        maxLength={30}
-        className="w-full border border-stone-300 rounded-lg px-3 py-3 text-base mb-3 focus:outline-none focus:border-stone-500"
-        autoFocus
-        onKeyDown={e => e.key === 'Enter' && handleSave()}
+    <>
+      {/* backdrop */}
+      <div
+        className="fixed inset-0 bg-black/30 z-40"
+        onClick={onCancel}
       />
 
-      <div className="flex gap-2">
-        <button
-          onClick={onCancel}
-          className="flex-1 py-2.5 border border-stone-300 rounded-lg text-sm text-stone-600 hover:bg-stone-50"
-        >
-          キャンセル
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={!text.trim() || saving}
-          className="flex-1 py-2.5 bg-stone-800 text-white rounded-lg text-sm disabled:opacity-50 hover:bg-stone-700"
-        >
-          {saving ? '保存中…' : isEdit ? '更新する' : '追加する'}
-        </button>
+      {/* sheet */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--cream)] rounded-t-2xl shadow-2xl">
+        <div className="max-w-2xl mx-auto px-6 pt-5 pb-8">
+          {/* handle */}
+          <div className="w-10 h-1 bg-[var(--border)] rounded-full mx-auto mb-5" />
+
+          <div className="ui text-xs text-[var(--muted)] mb-3 tracking-wide">
+            {isEdit ? `#${slotNumber} を編集` : `#${slotNumber} — 夢を書く`}
+          </div>
+
+          <input
+            ref={inputRef}
+            type="text"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder={`例: ${placeholder}`}
+            maxLength={40}
+            className="ui w-full border border-[var(--border)] rounded-xl px-4 py-3.5 text-base
+                       bg-white focus:outline-none focus:border-[var(--ink)] transition-colors mb-4"
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleSave()
+              if (e.key === 'Escape') onCancel()
+            }}
+          />
+
+          {/* char count */}
+          <div className="ui text-right text-xs text-[var(--muted)] -mt-2 mb-4">
+            {text.length} / 40
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={onCancel}
+              className="ui flex-1 py-3 border border-[var(--border)] rounded-xl text-sm text-[var(--muted)] hover:border-[var(--ink)] transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={!text.trim() || saving}
+              className="ui flex-2 px-8 py-3 bg-[var(--ink)] text-[var(--cream)] rounded-xl text-sm
+                         disabled:opacity-30 hover:opacity-80 transition-opacity"
+            >
+              {saving ? '保存中…' : isEdit ? '更新する' : '追加する'}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
